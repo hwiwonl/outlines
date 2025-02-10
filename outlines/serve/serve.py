@@ -36,7 +36,7 @@ from vllm.sampling_params import SamplingParams
 from vllm.utils import random_uuid
 
 from outlines.models.vllm import adapt_tokenizer
-from outlines.processors import JSONLogitsProcessor, RegexLogitsProcessor
+from outlines.processors import JSONLogitsProcessor, RegexLogitsProcessor, CFGLogitsProcessor
 
 TIMEOUT_KEEP_ALIVE = 5  # seconds.
 TIMEOUT_TO_PREVENT_DEADLOCK = 1  # seconds.
@@ -70,10 +70,13 @@ async def generate(request: Request) -> Response:
 
     json_schema = request_dict.pop("schema", None)
     regex_string = request_dict.pop("regex", None)
+    cfg_string = request_dict.pop("cfg", None)
     if json_schema is not None:
         logits_processors = [JSONLogitsProcessor(json_schema, tokenizer)]
     elif regex_string is not None:
         logits_processors = [RegexLogitsProcessor(regex_string, tokenizer)]
+    elif cfg_string is not None:
+        logits_processors = [CFGLogitsProcessor(cfg_string, tokenizer)]
     else:
         logits_processors = []
 
